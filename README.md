@@ -9,6 +9,8 @@ Unofficial bindings for node to libpng.
 
 Please also refer to the **[Documentation](https://prior99.github.io/node-libpng/docs/index.html)**.
 
+_Fork by Jean Moreno: added support for indexed color encoding._
+
 ## Table of contents
 
  * [node-libpng](#node-libpng)
@@ -24,6 +26,7 @@ Please also refer to the **[Documentation](https://prior99.github.io/node-libpng
            * [Writing PNG files using Promises](#writing-png-files-using-promises)
            * [Writing PNG files using a callback](#writing-png-files-using-a-callback)
            * [Writing PNG files synchroneously](#writing-png-files-synchroneously)
+           * [Writing PNG files with indexed color](#writing-png-files-with-indexed-color)
            * [Encoding into a Buffer](#encoding-into-a-buffer)
         * [Accessing the pixels](#accessing-the-pixels)
            * [Accessing in the image's color format](#accessing-in-the-images-color-format)
@@ -226,6 +229,36 @@ function writeMyFile() {
     };
     writePngFileSync("path/to/image.png", imageData, options);
     console.log("File successfully written.");
+}
+```
+
+In this example, a 100x60 pixel image will be encoded and written to disk.
+Based on the length of the buffer and the provided dimensions the presence of an alpha channel will be automatically calculated.
+
+It is possible to omit either `width` or `height` from the options.
+
+If an error occured while writing the file or encoding the buffer, it will be `throw`n.
+
+#### Writing PNG files with indexed color
+
+You can write palette-based PNG files using the optional `palette` argument with `writePngFile`.
+In this mode, the expected buffer should contain the indexes of each pixel to the supplied palette.
+The palette is expected to be in the RGBA format, even though the alpha channel isn't used at the moment.
+
+```typescript
+import { writePngFile } from "node-libpng";
+
+function writeIndexed() {
+    const pal = Buffer.alloc(256 * 4);
+	// (fill or generate palette...)
+    const imageData = Buffer.alloc(100 * 60);
+	// (fill with indexes to palette)
+    const options = {
+        width: 100,
+        height: 60,
+		palette: pal
+    };
+    writePngFile("path/to/image.png", imageData, options);
 }
 ```
 
@@ -468,3 +501,4 @@ cp pnglibconf.h ../../config/linux/
 ## Contributors
 
  - Frederick Gnodtke
+ - Jean Moreno (added support for indexed color file encoding)

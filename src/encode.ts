@@ -14,6 +14,10 @@ export interface EncodeOptions {
      * level of compression to use 0 - no compression, 1 - fastest, 9 - best size.
      */
     compressionLevel?: 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
+    /**
+     * Write an indexed color PNG using this palette, if not null.
+     */
+    palette?: Uint8Array;
 }
 
 /**
@@ -34,7 +38,7 @@ export function encode(buffer: Buffer, options: EncodeOptions): Buffer {
     if (typeof options !== "object" || options === null) {
         throw new Error("Options need to be an object.");
     }
-    let { width, height, compressionLevel = 9 } = options;
+    let { width, height, compressionLevel = 9, palette = null } = options;
     if (typeof width !== "number" || typeof height !== "number") {
         throw new Error("Error encoding PNG. Width and height need to be specified.");
     }
@@ -48,11 +52,16 @@ export function encode(buffer: Buffer, options: EncodeOptions): Buffer {
         throw new Error("Error encoding PNG. CompressionLevel needs to be an integer between 0 and 9.");
     }
     const bytesPerPixel = buffer.length / (width * height);
-    if (bytesPerPixel !== 3 && bytesPerPixel !== 4) {
+    if ((palette === null && bytesPerPixel !== 3 && bytesPerPixel !== 4)
+     || (palette !== null && bytesPerPixel !== 1)) {
         throw new Error("Error encoding PNG. Unsupported color type.");
     }
     const alpha = bytesPerPixel === 4;
-    return __native_encode(buffer, width, height, alpha, compressionLevel);
+    if (palette !== null) {
+        return __native_encode(buffer, width, height, alpha, compressionLevel, true, palette);
+    } else {
+        return __native_encode(buffer, width, height, alpha, compressionLevel, false);
+    }
 }
 
 export type WritePngFileCallback = (error: Error) => void;
