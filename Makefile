@@ -1,4 +1,4 @@
-default: build test lint docs
+default: build lint docs
 
 .PHONY: node_modules
 node_modules:
